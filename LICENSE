@@ -1,0 +1,107 @@
+Swarm — End User Licence Agreement
+Copyright (c) 2026 Scott Larkin. All rights reserved.
+
+NOT LEGAL ADVICE: this document was drafted as a starting point and has not been
+reviewed by a lawyer. Have it reviewed before you rely on it commercially, and
+fill in the bracketed placeholders in section 11.
+
+By downloading, installing, or using the Swarm software ("the Software"), you
+agree to this Agreement. If you do not agree, do not install or use the Software.
+
+1. LICENCE GRANT
+   Subject to your compliance with this Agreement, the copyright holder grants
+   you a personal, non-exclusive, non-transferable, revocable licence to install
+   and use the Software in the form in which it is distributed, on any number of
+   machines you own or control, for your own internal or personal purposes.
+
+2. RESERVATION OF RIGHTS
+   The Software is licensed, not sold. The copyright holder retains all right,
+   title, and interest in the Software, including all intellectual property
+   rights. No rights are granted other than those expressly stated here. Parts of
+   the Software are distributed in readable form, including its client source,
+   role files and documents, because it runs and is configured from them; that
+   grants no rights in its source code beyond running it as distributed.
+
+3. RESTRICTIONS
+   Except to the extent this restriction is unenforceable under applicable law,
+   you may not:
+   (a) redistribute, sell, rent, lease, sublicense, or otherwise make the
+       Software available to any third party;
+   (b) reverse engineer, decompile, or disassemble the compiled parts of the
+       Software, or attempt to derive their source code;
+   (c) modify the Software or create derivative works of it, except that you may
+       write your own roles, profiles and hooks for use with the Software,
+       including by adapting the files in its roles and examples directories;
+   (d) remove or obscure any copyright, licence, or attribution notice; or
+   (e) use the Software to build a competing product.
+
+4. THIRD-PARTY COMPONENTS
+   The Software includes open-source components licensed under their own terms.
+   Those components are listed, with their licences, in the THIRD_PARTY.md file
+   distributed with the Software. Nothing in this Agreement limits your rights
+   under those licences with respect to those components.
+
+5. YOUR DATA
+   The Software coordinates native coding agents, such as Claude Code or Codex,
+   that you install and sign in to yourself. It keeps its task graph, events,
+   messages and the text of the prompts it sends in a Neo4j database that you
+   provide and control, whether your own or a local one started from the compose
+   file distributed with the Software. It keeps credentials, briefs and logs in
+   private files on your machine. The native agents keep their own transcripts,
+   and send what they are given and the work they do to the model provider you
+   signed in to, under your own agreement with that provider; the Software itself
+   sends nothing to any model provider. Deleting a swarm removes its database
+   records, not those files or transcripts. While a prompt is delivered to an
+   agent its text is briefly visible in your machine's process list, so do not
+   put secrets in prompts or messages.
+
+   The copyright holder does not collect, transmit, or receive your data, and the
+   Software's own code contains no analytics or telemetry that reports off your
+   machine. Third-party programs it starts or works with, including the native
+   agents, have their own behaviour and settings; the compose file distributed
+   with the Software turns off Neo4j's anonymous usage reporting.
+
+   Agents, and any hooks you configure, act with your own permissions. The
+   Software does not sandbox them or separate them from each other. You are
+   responsible for what they do, and for the security of your own database,
+   credentials, native agent logins, and any third-party model provider you use.
+
+6. FEEDBACK
+   If you send feedback or bug reports, you grant the copyright holder a
+   perpetual, royalty-free licence to use them without obligation to you. Do not
+   send confidential information or credentials in a bug report.
+
+7. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. The Software is not
+   intended for use in any environment where its failure could lead to death,
+   personal injury, or severe physical or environmental damage.
+
+8. LIMITATION OF LIABILITY
+   TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE
+   COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY,
+   WHETHER IN CONTRACT, TORT, OR OTHERWISE, ARISING FROM OR IN CONNECTION WITH
+   THE SOFTWARE OR ITS USE, INCLUDING ANY LOSS OF DATA OR LOST PROFITS. Nothing
+   in this Agreement excludes or limits liability that cannot lawfully be
+   excluded or limited, including liability for death or personal injury caused
+   by negligence, or for fraud.
+
+9. NO SUPPORT OBLIGATION
+   The Software is provided without any obligation to supply support, updates, or
+   maintenance, unless separately agreed in writing.
+
+10. TERM AND TERMINATION
+    This Agreement applies until terminated. It terminates automatically if you
+    breach it. On termination you must stop using the Software and delete all
+    copies. Sections 2, 3, 6, 7, 8, and 11 survive termination.
+
+11. GOVERNING LAW
+    This Agreement is governed by the laws of [JURISDICTION], and the courts of
+    [JURISDICTION] have exclusive jurisdiction, without prejudice to any
+    mandatory consumer protections available to you in your place of residence.
+
+12. ENTIRE AGREEMENT AND SEVERABILITY
+    This Agreement is the entire agreement between you and the copyright holder
+    regarding the Software. If any provision is held unenforceable, the remaining
+    provisions remain in full force.
