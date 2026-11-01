@@ -76,7 +76,7 @@ own configuration. Nothing prints a password.
 The documentation is in the installed copy, at `~/.local/share/swarm/current/`:
 
 - `README.md` for setup details and the TUI keys.
-- `OPERATIONS.md` for running Swarm day to day: fresh setup, recovery, upgrade and rollback, the trust boundary.
+- `OPERATIONS.md` for running Swarm day to day: fresh setup, recovery, upgrade and rollback, the trust boundary. If an agent seems to ignore its messages, see its Troubleshooting table (Claude Code can show a setup dialog over an idle pane; choose "Don't show again").
 - `examples/` for ready-made swarm profiles, and `roles/` for the role text agents are briefed with.
 
 ## Upgrade and roll back
