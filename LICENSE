@@ -2,17 +2,18 @@ Swarm — End User Licence Agreement
 Copyright (c) 2026 Scott Larkin. All rights reserved.
 
 NOT LEGAL ADVICE: this document was drafted as a starting point and has not been
-reviewed by a lawyer. Have it reviewed before you rely on it commercially, and
-fill in the bracketed placeholders in section 11.
+reviewed by a lawyer. Have it reviewed before you rely on it commercially.
 
 By downloading, installing, or using the Swarm software ("the Software"), you
 agree to this Agreement. If you do not agree, do not install or use the Software.
 
 1. LICENCE GRANT
    Subject to your compliance with this Agreement, the copyright holder grants
-   you a personal, non-exclusive, non-transferable, revocable licence to install
+   you a non-exclusive, non-transferable, revocable licence to install
    and use the Software in the form in which it is distributed, on any number of
-   machines you own or control, for your own internal or personal purposes.
+   machines. If you accept this Agreement on behalf of an organisation, "you" means
+   that organisation, including its employees and contractors using the Software
+   for it.
 
 2. RESERVATION OF RIGHTS
    The Software is licensed, not sold. The copyright holder retains all right,
@@ -97,8 +98,8 @@ agree to this Agreement. If you do not agree, do not install or use the Software
     copies. Sections 2, 3, 6, 7, 8, and 11 survive termination.
 
 11. GOVERNING LAW
-    This Agreement is governed by the laws of [JURISDICTION], and the courts of
-    [JURISDICTION] have exclusive jurisdiction, without prejudice to any
+    This Agreement is governed by the laws of England and Wales, and the courts of
+    England and Wales have exclusive jurisdiction, without prejudice to any
     mandatory consumer protections available to you in your place of residence.
 
 12. ENTIRE AGREEMENT AND SEVERABILITY
