@@ -13,8 +13,9 @@ any agent; the person does that.
 Do not do these yourself unless the person told you to in this conversation. Propose the exact
 command and wait.
 
-- **Signing in.** `gh auth login` (needed while the release repository is private), and logging in
-  to Claude or Codex. You cannot do either, and must not look for tokens to do it for them.
+- **Signing in.** Logging in to Claude or Codex, and `gh auth login` if the person wants `gh` to do the
+  downloading (the release repository is public, so `curl` needs no sign-in). You cannot do either, and
+  must not look for tokens to do it for them.
 - **Anything that needs `sudo`, and installing prerequisites.** Herdr (https://herdr.dev), Docker
   with its compose plugin, a native agent CLI (`claude` or `codex`), `ps` (the `procps` package,
   absent from minimal Linux images), and on Linux OpenSSL 3. The installer installs none
@@ -40,9 +41,13 @@ and do not repeat it. `swarm doctor` prints neither, and is the way to check.
 
 **1. Check the platform.** Run `uname -sm`.
 
-- `Darwin arm64` is `darwin-arm64`. It needs macOS 15 or later (`sw_vers -productVersion`) and carries
-  its own OpenSSL, so Homebrew's is not needed. **That archive has not been run on a real Mac yet.**
-  Tell the person so before you go on, and continue only if they still want to.
+- `Darwin arm64` is `darwin-arm64`. It needs macOS 15 or later (`sw_vers -productVersion`), the build's
+  minimum, and carries its own OpenSSL, so Homebrew's is not needed. **That archive has been run on one
+  real Mac, by its owner: v0.1.2 on macOS 26.6.2 (M4 Pro).** Not yet run on a Mac: `f` to attach, stopping
+  a swarm, the task list table, a browser download, a `curl` install and whether `legacy.dylib` is still
+  looked for under `/tmp`. The binaries are not notarized, so
+  macOS may show a pop-up: do not click past it for the person; ask them to copy its words to you. Tell the
+  person that it is early software, run on one Mac only, before you go on, and continue only if they still want to.
 - `Linux x86_64` is `linux-x64`. A current glibc distro is needed (Ubuntu 24.04 and Debian 13 were
   tried), with OpenSSL 3.
 - If `[ -e /etc/NIXOS ]` is true, the published Linux archive does not run on NixOS, and the
@@ -66,18 +71,21 @@ step 5 be the test, rather than stopping).
 Report anything missing to the person and let them fix it. Do not continue past a missing Docker
 or Herdr. (`install.sh` also lists what it cannot find, and `swarm init` refuses with a list.)
 
-**3. Install.** While the release repository is private, `gh` must be signed in: run
-`gh auth status`. If it fails, ask the person to run `gh auth login` and wait.
+**3. Install.** The release repository is public, so `curl` needs no sign-in:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/scottlarkin/swarm-release/main/install.sh -o install.sh
+```
+
+A full install by `curl` has not been run; the `gh` route has, on a Mac. If `gh auth status` succeeds, the
+same script comes through `gh`, and `install.sh` then downloads with `gh` too:
 
 ```sh
 gh api -H 'Accept: application/vnd.github.raw' repos/scottlarkin/swarm-release/contents/install.sh > install.sh
 ```
 
-Once the repository is public, the same script comes without `gh`:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/scottlarkin/swarm-release/main/install.sh -o install.sh
-```
+Do not ask the person to sign in to `gh` for this; if neither `curl` nor a signed-in `gh` is there, that is the
+only time to ask.
 
 It is short; read it, and show the person if they ask. The script is not inside the release archive, so
 you need it even when the person has already given you an archive: fetch it as above, or use the copy
@@ -169,7 +177,9 @@ Any check that is not `ok` and not one of the harmless `missing` cases above mea
   yourself, tell them it is running, that plain `herdr` attaches to it, and that you left it for them;
 - that they create a swarm from the TUI, that a folder trust dialog may appear in an agent's pane the first
   time, and that they must be signed in to Claude or Codex before agents can run;
-- on a Mac, that this archive is untested on real hardware.
+- on a Mac, that this archive has been run on one Mac only (its owner's, v0.1.2 on macOS 26.6.2), and that `f`
+  to attach, stopping a swarm, the task list table, a browser download, a `curl` install and the `legacy.dylib`
+  check are not yet run.
 
 Do not create a swarm for them unless they ask. Later, to update: rerun `install.sh`; it says when
 `current` moved, and then `swarm daemon stop` and `swarm daemon start` bring the daemon onto the
@@ -188,8 +198,8 @@ new version.
 | What you see | What it means and what to do |
 | --- | --- |
 | `this needs curl, or gh signed in with gh auth login` | Neither tool is usable. Ask the person to run `gh auth login` or install `curl`. |
-| `download failed. While the repo is private, run gh auth login first` | Not signed in to `gh`, or the version does not exist. Check `gh auth status`; ask the person to sign in; rerun. |
-| `could not resolve the latest release` | Plain `curl` cannot find the latest release of a private repository. Sign in with `gh auth login`, or ask the person for the version and pass `--version vX.Y.Z`. |
+| `download failed: swarm <version> for <target> ...` | The version does not exist for this platform, or the network failed. Check the version with the person and pass `--version vX.Y.Z`; rerun. |
+| `could not resolve the latest release` | The latest release could not be read: none exists, or the network failed. Ask the person for the version and pass `--version vX.Y.Z`. |
 | `checksum mismatch ... not installing` | Do not go on. Try once more; if it repeats, tell the person and do not work around it. |
 | `has no line for ... not installing` | The release has no archive for this platform. Stop and say so. |
 | `NixOS cannot run the linux-x64 archive` | Stop. Building from source is the person's call. |

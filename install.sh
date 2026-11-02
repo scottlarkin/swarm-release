@@ -4,10 +4,10 @@
 # It installs none of Swarm's requirements; it names what is missing. Rerunning is safe,
 # and an older version stays on disk for rolling back (see OPERATIONS.md, "Upgrade").
 #
-# Repo private (needs `gh auth login`):
-#   gh api -H 'Accept: application/vnd.github.raw' repos/scottlarkin/swarm-release/contents/install.sh | sh
-# Repo public:
+# The release repository is public, so curl needs no sign-in:
 #   curl -fsSL https://raw.githubusercontent.com/scottlarkin/swarm-release/main/install.sh | sh
+# With gh signed in (`gh auth login`), the script also downloads with gh:
+#   gh api -H 'Accept: application/vnd.github.raw' repos/scottlarkin/swarm-release/contents/install.sh | sh
 # Options (after `sh -s --` when piped): --version vX.Y.Z (default: latest release);
 #   --file PATH, a local archive, checked when a checksums.txt sits beside it.
 # Environment: SWARM_INSTALL_ROOT (default ~/.local/share/swarm); SWARM_INSTALL_BIN, where the swarm
@@ -49,12 +49,12 @@ main() {
     via=curl base=${SWARM_RELEASE_BASE:-}
     [ -n "$base" ] || ! command -v gh >/dev/null 2>&1 || ! gh auth status >/dev/null 2>&1 || via=gh
     [ $via = gh ] || command -v curl >/dev/null 2>&1 || die "this needs curl, or gh signed in with \`gh auth login\`; neither is available"
-    if [ -z "$version" ]; then # a private repo has no /releases/latest redirect for curl, so gh asks
+    if [ -z "$version" ]; then # gh asks the API; curl follows the /releases/latest redirect
       [ -z "$base" ] || die "SWARM_RELEASE_BASE needs --version"
       if [ $via = gh ]; then version=$(gh release view --repo "$repo" --json tagName --jq .tagName) || die "gh found no release in $repo; pass --version vX.Y.Z"
       else version=$(curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/$repo/releases/latest" | sed 's#.*/tag/##'); fi
       version=${version#v}
-      case $version in "" | latest | */*) die "could not resolve the latest release (a private repo needs \`gh auth login\`); or pass --version vX.Y.Z" ;; esac
+      case $version in "" | latest | */*) die "could not resolve the latest release of $repo (is there one, and is the network up?); pass --version vX.Y.Z" ;; esac
     fi
     archive=$tmp/dl/swarm-$version-$target.tar.gz sums=$tmp/dl/checksums.txt
     echo "Downloading swarm $version for $target with $via"
@@ -63,7 +63,7 @@ main() {
     else
       base=${base:-https://github.com/$repo/releases/download/v$version}
       curl -fsSL -o "$archive" "$base/${archive##*/}" && curl -fsSL -o "$sums" "$base/checksums.txt"
-    fi || die "download failed. While the repo is private, run \`gh auth login\` first; then rerun."
+    fi || die "download failed: swarm $version for $target from $repo, with $via. Check the version (--version vX.Y.Z) and the network; then rerun."
   fi
   name=${archive##*/}
   if [ -f "$sums" ]; then
