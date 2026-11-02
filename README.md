@@ -7,8 +7,8 @@ worktrees, integrate results and clean up; a deliverable can be a PR, a branch, 
 
 Closed-source software. See [LICENSE](LICENSE).
 
-> **Early software.** Expect rough edges. **The Mac archive has been run on one Mac, by its owner: v0.1.3, and before it
-> v0.1.2, on macOS 26.6.2.** Nothing else has run it on a Mac, and v0.1.4 has not. Read "About the Mac archive" below for
+> **Early software.** Expect rough edges. **The Mac archive has been run on one Mac, by its owner: v0.1.4, and before it
+> v0.1.3 and v0.1.2, on macOS 26.6.2.** Nothing else has run it on a Mac, and v0.1.5 has not. Read "About the Mac archive" below for
 > what was and was not shown.
 
 ## Platforms
@@ -16,7 +16,7 @@ Closed-source software. See [LICENSE](LICENSE).
 | Platform | Archive | Status |
 | --- | --- | --- |
 | Linux x86_64, glibc | `swarm-<version>-linux-x64.tar.gz` | Built in a Debian 12 container (glibc 2.36). The highest glibc symbol its binaries need is 2.34, by a scan of the binaries. A generic Linux archive of an earlier build has been run in Debian 13 and Ubuntu 24.04 containers, and a full `curl` install of v0.1.3 in a Debian 12 container as a non-root user, as far as `swarm help`. Other glibc distributions of that age or newer are expected to work, and have not been run. Needs OpenSSL 3 on the host. |
-| macOS on Apple Silicon | `swarm-<version>-darwin-arm64.tar.gz` | **Run on one Mac, by its owner.** Built on Linux against a prebuilt macOS Erlang runtime. Its owner ran v0.1.3 and v0.1.2 on macOS 26.6.2 (M4 Pro); see "About the Mac archive". Other macOS versions and chips are untried. |
+| macOS on Apple Silicon | `swarm-<version>-darwin-arm64.tar.gz` | **Run on one Mac, by its owner.** Built on Linux against a prebuilt macOS Erlang runtime. Its owner ran v0.1.4, v0.1.3 and v0.1.2 on macOS 26.6.2 (M4 Pro); see "About the Mac archive". Other macOS versions and chips are untried. |
 
 Not published: Intel Macs, Windows, Linux on ARM, and NixOS (the generic Linux archive cannot start there).
 
@@ -109,16 +109,25 @@ passed on:
 
 And v0.1.2: install through `gh`, and a real CLI swarm with a Claude and a Codex worker, which committed and reported.
 
-**Codex on a Mac.** Codex's sandbox needed an approved escalation to reach Swarm's local daemon on loopback, so every
-Codex worker may show that permission prompt in its pane. Answering it is the person's decision.
+**Codex on a Mac.** Codex's own sandbox can block a worker from the daemon; the owner runs Codex with `sandbox_mode = "danger-full-access"`.
 
 **Not yet run on a Mac:** a download by browser, and whether the OpenSSL `legacy.dylib` is still looked for under
-`/tmp` (the check needs `sudo`). **v0.1.4 has not run on a Mac**: in it, a launch at a trust dialog binds and the brief
-goes by itself once the dialog is answered, which is untested there, and with real Codex anywhere.
+`/tmp` (the check needs `sudo`).
+
+**v0.1.4, on the same Mac** (macOS 26.6.2, M4 Pro, codex-cli 0.166.0, Claude Code 2.1.316, real Claude and real Codex):
+
+- The old daemon's stop named only the port, as expected; v0.1.4's named its PID and the port; `start` served and `doctor` was ok.
+- The manager's harness from the configuration; the Directory cursor stayed at the end of the path.
+- A launch at Claude's and at Codex's trust dialogs: nothing typed at the dialog, and the brief went by itself once it was answered. Codex kept its process through the answer. Codex asks for folder trust only inside a git repository.
+- `swarm stop` closed a Codex pane; a replacement in the now-trusted folder was submitted with no dialog.
+- `recommended-agent` chose a manager when none was configured.
+- Take down and delete, which removed the swarm's saved files and left the connection file.
+
+Not run: the `fs_usage` trace and the browser download.
 
 **What this does not show.** One Mac. macOS 15 is the build's minimum, a requirement and not something that was seen;
 the only other macOS that ran any Swarm archive was a hosted runner on 15.8.2, with the v0.1.0 archive. A release other
-than v0.1.3 and v0.1.2 has not been shown on a Mac until this page says so.
+than v0.1.4, v0.1.3 and v0.1.2 has not been shown on a Mac until this page says so.
 
 **Signing.** The binaries are not notarized. All but Bun are ad-hoc signed, and Bun carries its upstream Developer ID
 signature (measured on a hosted runner, v0.1.0 archive), so macOS may show a pop-up. A `gh` install left no

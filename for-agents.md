@@ -22,8 +22,9 @@ command and wait.
   of them and neither do you. Name what is missing and how to get it.
 - **The folder trust dialog.** The first time Swarm starts an agent in a directory, Claude Code or Codex
   asks whether to trust it. That appears in the agent's own pane, later, when the person starts a swarm,
-  and only they answer it; the brief then goes by itself. On a Mac, a Codex worker's sandbox may also ask
-  to reach Swarm's daemon on loopback: that is the person's call too. Tell them both may appear.
+  and only they answer it; the brief then goes by itself. Codex's own sandbox can block a worker from the
+  daemon; the owner runs Codex with `sandbox_mode = "danger-full-access"`. Tell the person about the dialog and
+  the sandbox.
 - **Consent for side effects.** `swarm init` starts a Neo4j container (about 1.5 GB of memory, and
   a first-time image download of several hundred MB) and a background daemon. Starting a Herdr
   server (step 4) leaves a process running after you finish. Ask before each.
@@ -44,7 +45,7 @@ and do not repeat it. `swarm doctor` prints neither, and is the way to check.
 
 - `Darwin arm64` is `darwin-arm64`. It needs macOS 15 or later (`sw_vers -productVersion`), the build's
   minimum, and carries its own OpenSSL, so Homebrew's is not needed. **That archive has been run on one
-  real Mac, by its owner: v0.1.3 and v0.1.2 on macOS 26.6.2 (M4 Pro); v0.1.4 has not.** Not yet run on a Mac:
+  real Mac, by its owner: v0.1.4, v0.1.3 and v0.1.2 on macOS 26.6.2 (M4 Pro), v0.1.4 with real Claude and real Codex.** Not yet run on a Mac:
   a browser download and whether `legacy.dylib` is still looked for under `/tmp`. The binaries are not notarized, so
   macOS may show a pop-up: do not click past it for the person; ask them to copy its words to you. Tell the
   person that it is early software, run on one Mac only, before you go on, and continue only if they still want to.
@@ -178,8 +179,8 @@ Any check that is not `ok` and not one of the harmless `missing` cases above mea
   yourself, tell them it is running, that plain `herdr` attaches to it, and that you left it for them;
 - that they create a swarm from the TUI, that a folder trust dialog may appear in an agent's pane the first
   time, and that they must be signed in to Claude or Codex before agents can run;
-- on a Mac, that this archive has been run on one Mac only (its owner's, v0.1.3 and v0.1.2 on macOS 26.6.2),
-  that v0.1.4 has not, and that a browser download and the `legacy.dylib` check are not yet run.
+- on a Mac, that this archive has been run on one Mac only (its owner's, v0.1.4, v0.1.3 and v0.1.2 on macOS 26.6.2),
+  and that a browser download and the `legacy.dylib` check are not yet run.
 
 Do not create a swarm for them unless they ask. Later, to update: rerun `install.sh`; it says when
 `current` moved, and then `swarm daemon stop` and `swarm daemon start` bring the daemon onto the
