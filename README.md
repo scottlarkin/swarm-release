@@ -7,16 +7,16 @@ worktrees, integrate results and clean up; a deliverable can be a PR, a branch, 
 
 Closed-source software. See [LICENSE](LICENSE).
 
-> **Early software.** Expect rough edges. **The Mac archive has been run on one Mac, by its owner: v0.1.2 on macOS
-> 26.6.2.** Nothing else has run it on a Mac. Read "About the Mac archive" below for what was
-> and was not shown.
+> **Early software.** Expect rough edges. **The Mac archive has been run on one Mac, by its owner: v0.1.3, and before it
+> v0.1.2, on macOS 26.6.2.** Nothing else has run it on a Mac, and v0.1.4 has not. Read "About the Mac archive" below for
+> what was and was not shown.
 
 ## Platforms
 
 | Platform | Archive | Status |
 | --- | --- | --- |
-| Linux x86_64, glibc | `swarm-<version>-linux-x64.tar.gz` | Built in a Debian 12 container (glibc 2.36). The highest glibc symbol its binaries need is 2.34, by a scan of the binaries. A generic Linux archive of an earlier build has been run in Debian 13 and Ubuntu 24.04 containers. Other glibc distributions of that age or newer are expected to work, and have not been run. Needs OpenSSL 3 on the host. |
-| macOS on Apple Silicon | `swarm-<version>-darwin-arm64.tar.gz` | **Run on one Mac, by its owner.** Built on Linux against a prebuilt macOS Erlang runtime. Its owner ran v0.1.2 on macOS 26.6.2 (M4 Pro); see "About the Mac archive". Other macOS versions and chips are untried. |
+| Linux x86_64, glibc | `swarm-<version>-linux-x64.tar.gz` | Built in a Debian 12 container (glibc 2.36). The highest glibc symbol its binaries need is 2.34, by a scan of the binaries. A generic Linux archive of an earlier build has been run in Debian 13 and Ubuntu 24.04 containers, and a full `curl` install of v0.1.3 in a Debian 12 container as a non-root user, as far as `swarm help`. Other glibc distributions of that age or newer are expected to work, and have not been run. Needs OpenSSL 3 on the host. |
+| macOS on Apple Silicon | `swarm-<version>-darwin-arm64.tar.gz` | **Run on one Mac, by its owner.** Built on Linux against a prebuilt macOS Erlang runtime. Its owner ran v0.1.3 and v0.1.2 on macOS 26.6.2 (M4 Pro); see "About the Mac archive". Other macOS versions and chips are untried. |
 
 Not published: Intel Macs, Windows, Linux on ARM, and NixOS (the generic Linux archive cannot start there).
 
@@ -40,14 +40,14 @@ With `gh`, sign in once with `gh auth login`, then:
 gh api -H 'Accept: application/vnd.github.raw' repos/scottlarkin/swarm-release/contents/install.sh | sh
 ```
 
-The owner's Mac run installed this way. Or the same script by plain `curl`, which needs no sign-in:
+The owner's Mac installed v0.1.2 this way and upgraded to v0.1.3. Or the same script by plain `curl`, which needs no sign-in:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/scottlarkin/swarm-release/main/install.sh | sh
 ```
 
-The script downloads with `gh` when `gh auth status` succeeds and with `curl` otherwise. A `curl` fetch of the v0.1.2
-archives and `checksums.txt` without signing in was checked to work, but **a full install by `curl` has not been run.**
+The script downloads with `gh` when `gh auth status` succeeds and with `curl` otherwise. A `curl` install of v0.1.3 ran on
+the owner's Mac, and a full `curl` install of v0.1.3 ran in a Debian 12 container as a non-root user, as far as `swarm help`.
 
 The script detects your OS and CPU, downloads that archive and `checksums.txt`, stops unless the sha256 matches,
 unpacks it to `~/.local/share/swarm/versions/<version>/`, points `~/.local/share/swarm/current` at it and links
@@ -95,21 +95,30 @@ rollback does not undo.
 Be plain about what is known. The macOS runtime in the archive is a prebuilt Erlang for Apple Silicon, and the Swarm
 daemon, the client and Bun are assembled around it on a Linux machine.
 
-**Shown, by its owner on a real Mac (v0.1.2 on macOS 26.6.2, M4 Pro):**
+**Shown, by its owner on a real Mac (macOS 26.6.2, M4 Pro).** v0.1.3, as reported by a Mac-side Claude, with no output
+passed on:
 
-- Install through `gh`, then `swarm init` and `swarm doctor`.
-- The OpenSSL pin check passed, its control included.
-- A real CLI swarm with a Claude and a Codex worker, which committed and reported.
-- The TUI in a real terminal: the owner reports that it works. Which steps they took was not recorded.
-- A `gh` install carried no quarantine attribute, only `com.apple.provenance`.
+- An upgrade from v0.1.2 through `gh`, and a `curl` install.
+- `swarm init` and `swarm doctor`, and the OpenSSL pin check with its control.
+- In the TUI: the new-swarm form, the task list table with its sorting, `f` to attach to an agent, and taking a swarm down.
+- A launch at Claude's folder trust dialog: Enter refused while it was up and typed nothing; once it was answered, one
+  Enter adopted the manager and sent its brief.
+- A configured role and `swarm create --config`.
+- A Codex worker kept its scratch file in a temporary directory outside its folder.
+- Only `com.apple.provenance` on the programs, no quarantine attribute.
 
-**Not yet run on a Mac:** `f` to attach to an agent, stopping a swarm, the task list table, a download by browser, a
-full install by `curl`, and whether the OpenSSL `legacy.dylib` is still looked for under `/tmp`. They stay untested
-until the owner's next run.
+And v0.1.2: install through `gh`, and a real CLI swarm with a Claude and a Codex worker, which committed and reported.
 
-**What this does not show.** One Mac and one version. macOS 15 is the build's minimum, a requirement and not something
-that was seen; the only other macOS that ran any Swarm archive was a hosted runner on 15.8.2, with the v0.1.0 archive.
-A release other than v0.1.2 has not been shown on a Mac until this page says so.
+**Codex on a Mac.** Codex's sandbox needed an approved escalation to reach Swarm's local daemon on loopback, so every
+Codex worker may show that permission prompt in its pane. Answering it is the person's decision.
+
+**Not yet run on a Mac:** a download by browser, and whether the OpenSSL `legacy.dylib` is still looked for under
+`/tmp` (the check needs `sudo`). **v0.1.4 has not run on a Mac**: in it, a launch at a trust dialog binds and the brief
+goes by itself once the dialog is answered, which is untested there, and with real Codex anywhere.
+
+**What this does not show.** One Mac. macOS 15 is the build's minimum, a requirement and not something that was seen;
+the only other macOS that ran any Swarm archive was a hosted runner on 15.8.2, with the v0.1.0 archive. A release other
+than v0.1.3 and v0.1.2 has not been shown on a Mac until this page says so.
 
 **Signing.** The binaries are not notarized. All but Bun are ad-hoc signed, and Bun carries its upstream Developer ID
 signature (measured on a hosted runner, v0.1.0 archive), so macOS may show a pop-up. A `gh` install left no
