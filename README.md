@@ -8,7 +8,7 @@ worktrees, integrate results and clean up; a deliverable can be a PR, a branch, 
 Closed-source software. See [LICENSE](LICENSE).
 
 > **Early software.** Expect rough edges. **The Mac archive has been run on one Mac, by its owner: v0.1.4, and before it
-> v0.1.3 and v0.1.2, on macOS 26.6.2.** Nothing else has run it on a Mac, and v0.1.5 has not. Read "About the Mac archive" below for
+> v0.1.3 and v0.1.2, on macOS 26.6.2.** v0.1.5 has run there too, all but its sandbox hint, which v0.1.6 fixes. Nothing else has run it on a Mac, and v0.1.6 has not. Read "About the Mac archive" below for
 > what was and was not shown.
 
 ## Platforms
@@ -16,7 +16,7 @@ Closed-source software. See [LICENSE](LICENSE).
 | Platform | Archive | Status |
 | --- | --- | --- |
 | Linux x86_64, glibc | `swarm-<version>-linux-x64.tar.gz` | Built in a Debian 12 container (glibc 2.36). The highest glibc symbol its binaries need is 2.34, by a scan of the binaries. A generic Linux archive of an earlier build has been run in Debian 13 and Ubuntu 24.04 containers, and a full `curl` install of v0.1.3 in a Debian 12 container as a non-root user, as far as `swarm help`. Other glibc distributions of that age or newer are expected to work, and have not been run. Needs OpenSSL 3 on the host. |
-| macOS on Apple Silicon | `swarm-<version>-darwin-arm64.tar.gz` | **Run on one Mac, by its owner.** Built on Linux against a prebuilt macOS Erlang runtime. Its owner ran v0.1.4, v0.1.3 and v0.1.2 on macOS 26.6.2 (M4 Pro); see "About the Mac archive". Other macOS versions and chips are untried. |
+| macOS on Apple Silicon | `swarm-<version>-darwin-arm64.tar.gz` | **Run on one Mac, by its owner.** Built on Linux against a prebuilt macOS Erlang runtime. Its owner ran v0.1.5, v0.1.4, v0.1.3 and v0.1.2 on macOS 26.6.2 (M4 Pro); see "About the Mac archive". Other macOS versions and chips are untried. |
 
 Not published: Intel Macs, Windows, Linux on ARM, and NixOS (the generic Linux archive cannot start there).
 
@@ -125,9 +125,11 @@ And v0.1.2: install through `gh`, and a real CLI swarm with a Claude and a Codex
 
 Not run: the `fs_usage` trace and the browser download.
 
+**v0.1.5, on the same Mac** (codex-cli 0.166.0, Claude Code 2.1.316, real Claude and real Codex, Codex with `sandbox_mode = "danger-full-access"`): an install through `gh` and an upgrade from v0.1.4; each daemon's stop named its PID and the port; `doctor` was ok; `swarm create --config` chose the configured manager; a launch at Claude's trust dialog briefed itself once answered; the manager recruited a Codex worker, which wrote its file and messaged the manager; `swarm stop` closed each pane, with nothing typed; delete removed the swarm's saved files and kept the connection file. The sandbox hint (#271) did not fire under macOS Seatbelt in v0.1.5; v0.1.6 fixes it, not yet run on a Mac. Not run: the `fs_usage` trace and the browser download.
+
 **What this does not show.** One Mac. macOS 15 is the build's minimum, a requirement and not something that was seen;
 the only other macOS that ran any Swarm archive was a hosted runner on 15.8.2, with the v0.1.0 archive. A release other
-than v0.1.4, v0.1.3 and v0.1.2 has not been shown on a Mac until this page says so.
+than v0.1.5, v0.1.4, v0.1.3 and v0.1.2 has not been shown on a Mac until this page says so.
 
 **Signing.** The binaries are not notarized. All but Bun are ad-hoc signed, and Bun carries its upstream Developer ID
 signature (measured on a hosted runner, v0.1.0 archive), so macOS may show a pop-up. A `gh` install left no

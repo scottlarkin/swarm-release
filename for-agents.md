@@ -45,7 +45,7 @@ and do not repeat it. `swarm doctor` prints neither, and is the way to check.
 
 - `Darwin arm64` is `darwin-arm64`. It needs macOS 15 or later (`sw_vers -productVersion`), the build's
   minimum, and carries its own OpenSSL, so Homebrew's is not needed. **That archive has been run on one
-  real Mac, by its owner: v0.1.4, v0.1.3 and v0.1.2 on macOS 26.6.2 (M4 Pro), v0.1.4 with real Claude and real Codex.** Not yet run on a Mac:
+  real Mac, by its owner: v0.1.5, v0.1.4, v0.1.3 and v0.1.2 on macOS 26.6.2 (M4 Pro), v0.1.4 and v0.1.5 with real Claude and real Codex.** Not yet run on a Mac:
   a browser download and whether `legacy.dylib` is still looked for under `/tmp`. The binaries are not notarized, so
   macOS may show a pop-up: do not click past it for the person; ask them to copy its words to you. Tell the
   person that it is early software, run on one Mac only, before you go on, and continue only if they still want to.
@@ -179,7 +179,7 @@ Any check that is not `ok` and not one of the harmless `missing` cases above mea
   yourself, tell them it is running, that plain `herdr` attaches to it, and that you left it for them;
 - that they create a swarm from the TUI, that a folder trust dialog may appear in an agent's pane the first
   time, and that they must be signed in to Claude or Codex before agents can run;
-- on a Mac, that this archive has been run on one Mac only (its owner's, v0.1.4, v0.1.3 and v0.1.2 on macOS 26.6.2),
+- on a Mac, that this archive has been run on one Mac only (its owner's, v0.1.5, v0.1.4, v0.1.3 and v0.1.2 on macOS 26.6.2),
   and that a browser download and the `legacy.dylib` check are not yet run.
 
 Do not create a swarm for them unless they ask. Later, to update: rerun `install.sh`; it says when
