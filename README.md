@@ -8,7 +8,7 @@ worktrees, integrate results and clean up; a deliverable can be a PR, a branch, 
 Closed-source software. See [LICENSE](LICENSE).
 
 > **Early software.** Expect rough edges. **The Mac archive has been run on one Mac, by its owner: v0.1.4, and before it
-> v0.1.3 and v0.1.2, on macOS 26.6.2.** v0.1.5 has run there too, all but its sandbox hint, and v0.1.6 showed that hint working. v0.1.7 has run there too, in part: read "About the Mac archive" for what it did not cover. v0.1.8 is published before its Mac run: its Mac checks are run after publish. Nothing else has run it on a Mac. Read "About the Mac archive" below for
+> v0.1.3 and v0.1.2, on macOS 26.6.2.** v0.1.5 has run there too, all but its sandbox hint, and v0.1.6 showed that hint working. v0.1.7 has run there too, in part: read "About the Mac archive" for what it did not cover. v0.1.8 has run there too, in part: read "About the Mac archive" for what it did not cover. v0.1.9 is published before its Mac run: its Mac checks are run after publish. Nothing else has run it on a Mac. Read "About the Mac archive" below for
 > what was and was not shown.
 
 ## Platforms
@@ -16,7 +16,7 @@ Closed-source software. See [LICENSE](LICENSE).
 | Platform | Archive | Status |
 | --- | --- | --- |
 | Linux x86_64, glibc | `swarm-<version>-linux-x64.tar.gz` | Built in a Debian 12 container (glibc 2.36). The highest glibc symbol its binaries need is 2.34, by a scan of the binaries. A generic Linux archive of an earlier build has been run in Debian 13 and Ubuntu 24.04 containers, and a full `curl` install of v0.1.3 in a Debian 12 container as a non-root user, as far as `swarm help`. Other glibc distributions of that age or newer are expected to work, and have not been run. Needs OpenSSL 3 on the host. |
-| macOS on Apple Silicon | `swarm-<version>-darwin-arm64.tar.gz` | **Run on one Mac, by its owner.** Built on Linux against a prebuilt macOS Erlang runtime. Its owner ran v0.1.5, v0.1.4, v0.1.3 and v0.1.2 on macOS 26.6.2 (M4 Pro); see "About the Mac archive". Other macOS versions and chips are untried. |
+| macOS on Apple Silicon | `swarm-<version>-darwin-arm64.tar.gz` | **Run on one Mac, by its owner.** Built on Linux against a prebuilt macOS Erlang runtime. Its owner ran v0.1.8, v0.1.7, v0.1.5, v0.1.4, v0.1.3 and v0.1.2 on macOS 26.6.2 (M4 Pro); see "About the Mac archive". Other macOS versions and chips are untried. |
 
 Not published: Intel Macs, Windows, Linux on ARM, and NixOS (the generic Linux archive cannot start there).
 
@@ -90,18 +90,71 @@ Run `install.sh` again: the new version unpacks beside the old one and `current`
 install root), then `swarm daemon start`. Old versions stay on disk. `OPERATIONS.md` has the full steps and what a
 rollback does not undo.
 
+## What changed in v0.1.9
+
+Each item was tested on Linux, and none with real Codex. v0.1.9 is published before its Mac run: the owner runs its Mac
+checks after publish, and "About the Mac archive" will say what they showed. The first four items fix what the v0.1.8
+Mac run found.
+
+- **The `x` menu offers Pause or Resume, never both (#307, #310).** The menu is now `Pause` or `Resume`, then
+  `Take down`, `Delete`, `Archive` (or `Restore`) and `Recover`, so Take down is always second. Resume is offered when
+  the swarm's control state is `pause_requested`, `paused`, `down_requested` or `down`, or when the runtime reads the
+  manager down; otherwise, unknown states included, Pause. In v0.1.8 Pause came first and Resume second, so a down-arrow
+  and Enter meant for Take down sent "Resume work" to a running manager. Items are hidden, not greyed out. **Limit:**
+  checked by tests, not looked at in a real TUI.
+- **New-swarm Directory: typing replaces the prefilled path (#309).** The prefill is a suggestion: the first printable
+  key or a paste replaces it, and an arrow, Backspace or Esc first keeps it to edit. The step's hint says so. A path with
+  a `~` after its start or a `//` is refused before anything is made: "Working directory "…" has a ~ after its start or
+  a //, as when a path is typed onto another; type it again. Nothing was created." In v0.1.8, typing `~/swarm-v018/img`
+  made `<home>/swarm-v018~/swarm-v018/img`. **Limits:** a real directory with `~` inside its name is refused too.
+  Checked by tests, not looked at in a real TUI.
+- **`held_reason` is one sentence in `swarm quiet` and `session_busy` (#306).** The daemon holds the sentence, gives it
+  on each claim in `swarm sessions` and the live `control` frame, and `swarm quiet` reads it from there; `session_busy`'s
+  text is unchanged. In v0.1.8 `quiet`'s was worded differently. **Limit:** a claim from an older daemon, with no
+  sentence, reads "`<holder>` holds this agent's input".
+- **Composer images continue the swarm's numbering (#311).** An image attached in a `c` message after the Goal's image 1
+  is image 2, saved as `2-…`, not image 1 under a collision prefix: numbering continues past the highest number saved in
+  the swarm's `attachments/`. **Limit:** checked by tests only.
+- **`pr-poller.sh` runs `heartbeat.sh`, and its wakes change for PR owners (#312).** Its command line is the same. What
+  an owner sees now:
+  - A wake reads "Heartbeat for <you>: watch N (`pr_watch <part>`) changed …", names only the parts of the PR that
+    changed, carries no PR text, and ends with the `swarm ack` command to run. **Ack each wake:** the next wake waits for
+    that ack, so changes meanwhile come in one wake after it. A wake typed and not acked for 6 hours is sent once more.
+  - A PR with no change still wakes its owner every 6 hours.
+  - The first change wakes at once: the one-poll wait that folded a burst into one wake is gone.
+  - Nothing escalates to the lead: a refused submit is retried each poll and logged, and a third failed read of a part
+    in a row wakes the owner, not the lead. `--lead` is accepted and unused.
+  - It exits once the PR is merged or closed and that wake is acked or typed, or cannot be delivered because its owner
+    has no live session.
+  - It logs only events, so a lead checks that it is running by its lock (`flock -n <state dir>/lock true` fails while
+    it runs), not by the log's age. A recruiter's heartbeat sees a dead owner through `down_reports`; its
+    `stopped_heartbeats` reads heartbeat state directories only, not a poller's.
+  - It now needs `flock` and `timeout` (on a Mac, `brew install coreutils flock`), and a second poller on the same PR
+    exits.
+  **Limits:** run once before merge against a real draft PR, with a throwaway daemon, a real Claude owner and a 20 s
+  interval: a comment wake and its ack, a push wake, catch-up after a restart, and an exit after the close in each of
+  three cases (acked, typed and not acked, no live session). The 6 h beat and repeat were not waited out, and that PR
+  ran no checks, so no checks wake was seen. The tests use a stub `gh` and a stub `swarm`, under bash 5.2 and 3.2. One
+  older heartbeat test that counts repeats on a wall clock failed once under load.
+- **Test and development fixes.** #314: `real_scenarios.py` runs its agents in a fresh `/var/tmp` folder outside any
+  checkout, removes the folder only when every scenario passed, and removes that folder's trust entry from
+  `~/.claude.json` at the end; three other labs still use folders in the checkout. #308: `verify-swarm-package.sh` no
+  longer reads a stopped daemon's zombie as alive; the cause is inferred, not observed. #304: the thumbnails test waits
+  for each resize to be handled; the race was not forced.
+
 ## What changed in v0.1.8
 
-Each item was tested on Linux, and none with real Codex. v0.1.8 is published before its Mac run: the owner runs its Mac
-checks after publish, and "About the Mac archive" will say what they showed. Most items fix what the v0.1.7 Mac run found.
+Each item was tested on Linux, and none with real Codex. Part of it has since run on the owner's Mac; the items below
+say which, and "About the Mac archive" lists what was and was not shown. Most items fix what the v0.1.7 Mac run found.
 
 - **Thumbnails of attached images (#300).** Each image named in the new-swarm Goal or in a `c` message gets a small
   picture above the editor, under its `image N · name · size` line, up to four. Only in a terminal that answers Kitty
   graphics, as OpenTUI detects it, and in a pane at least 30 rows tall; otherwise, or for a file that does not decode,
   the text line stays as before. A picture is sent once and placed again by ID as the layout moves, and is deleted when
   its reference, the form or the composer goes, on `f`, and when the TUI exits. **Limits:** checked against a fake
-  terminal that answers like Kitty, not in real Herdr and not on a Mac: whether a picture is visible, stays put and
-  leaves nothing behind, including across Herdr tabs, is the owner's check after publish. A very large screenshot stalls
+  terminal that answers like Kitty. **Ran on a Mac**, in Ghostty under Herdr 0.9.1 with `kitty_graphics = true`: the
+  owner saw the pictures, and they stayed put and left nothing behind through redraws, delete, Ctrl+P and Ctrl+S, resize,
+  tab and workspace switch, `f`, and quit and pane close. A very large screenshot stalls
   input for about 135 ms, once, as it is attached.
 - **Blocked and waiting task icons.** A task's `statusIcon` may now be `blocked` (⊘, red: it needs someone else to act,
   named in its `state`) or `waiting` (◷, grey: it goes on by itself or on a known event, such as a free slot or CI). Both
@@ -111,7 +164,8 @@ checks after publish, and "About the Mac archive" will say what they showed. Mos
   when to switch. Found on a swarm where merged, sessionless and queued work all showed a spinner. **Limits:** the
   icons are only as true as the agents keep them, and a running swarm's agents follow the new role text only once
   re-briefed; old swarms, with only `loading` and `complete`, read as before. The glyphs are one cell in OpenTUI's
-  measure; in Ghostty that is the owner's check after publish.
+  measure, and **ran on a Mac** in Ghostty as one cell each, with titles and box edges aligned and the owner seeing no
+  width issue.
 - **`swarm delete` removes the swarm's attached images (#294).** Images pasted into a goal or a message, under
   `contexts/<swarm>/attachments/`, are now removed with the swarm and listed in its result, and the emptied
   `contexts/<swarm>` goes too. In v0.1.7 they stayed, unreported. Nothing is followed through a symlink: one there is
@@ -128,10 +182,10 @@ checks after publish, and "About the Mac archive" will say what they showed. Mos
   `herdr pane move <pane> --new-tab` command. The daemon never moves a pane. The guides now put each new agent, poller
   and heartbeat pane in a new tab, not a split: a split shrinks the pane beside it. Found on a swarm whose manager had
   split one tab into 8 panes of 3 to 5 rows, whose sends were refused for about 40 minutes. **Limit:** the pane's height
-  is read from Herdr's `pane get`, checked on Herdr 0.8.2 only.
+  is read from Herdr's `pane get`, checked on Herdr 0.8.2 and, on the Mac, on 0.9.1, which has the field.
 - **A probe for image previews in the TUI (#296).** `scripts/probe-kitty-image.ts` draws, redraws and deletes one Kitty
-  image with OpenTUI, for the owner's Mac. It is a probe, not a feature. **Limit:** on the Mac, the image appeared; that it
-  stays put through redraws and leaves nothing after its delete has not been confirmed.
+  image with OpenTUI, for the owner's Mac. It is a probe, not a feature. On the Mac, the image appeared; the thumbnails
+  run (#300) has since shown that it stays put and leaves nothing behind.
 - **A flaky integration test says why it failed (#299).** "Control restart closes real sockets …" failed once beside two
   other heavy test lanes: a fixed 5 s wait for a setup task found an empty mailbox. The test now waits for the task's
   message or its exit, up to 45 s, and names a crash or where a stall is. **Limit:** the failure was not reproduced, under
@@ -229,12 +283,25 @@ Found on that run, fixed in v0.1.8 (#294, #295) and not in v0.1.7: `swarm delete
 
 Not run: the Codex steps 4 to 6 (optional, not rerun); Cmd+V with an image-only clipboard and with a copied file; drag-and-drop, of a name with a space and of two files; an image copied from a browser; `pngpaste`. The owner does these by hand. The heartbeat with no `--watch` under bash 3.2 (#291) is not shown: the Mac run used a watch. The `fs_usage` trace and the browser download were not run.
 
-**v0.1.8: not yet run on a Mac.** It is published first; the owner runs the checklist's v0.1.8 steps after publish, and
-this section will say what they showed. #296's probe, run on that Mac before publish, showed only that an image appeared.
+**v0.1.8, on the same Mac** (macOS 26.6.2, codex-cli 0.166.0, Claude Code 2.1.317, herdr 0.9.1 with `kitty_graphics = true`, Ghostty). The steps are numbered as in the Mac checklist. Passed:
+
+- 1, upgrade: "Downloading swarm 0.1.8 for darwin-arm64 with gh", "sha256 verified", `current` moved from `versions/0.1.7` to `versions/0.1.8`. Stopping 0.1.7: "Daemon stopped: PID 6300 exited and port 4780 is free; native sessions remain in Herdr." `doctor` was ok.
+- 13, thumbnails (#300): two Ctrl+V PNGs in the Goal. The owner saw the pictures and confirmed 13.1 to 13.6 "all good and clean": redraws, delete, Ctrl+P and Ctrl+S, resize, tab and workspace switch, `f` then Ctrl+Q with a composer draft, and quit and pane close. This is the first sighting on a Mac, and it settles the probe's open questions (#296): the image stays put and nothing is left behind.
+- 14, `held_by` (#295): a quiet `.held` gave `held_by` "human" plus `held_reason`. The banner read "NATIVE TERMINAL / manager · 1 queued request waits on this focus, the oldest since 03:00 PM / Ctrl+Q returns to Swarm and lets it be typed." The second submit was refused `session_busy`, its sentence ending before `Details: {"held_by":"human","held_reason":…}`. After Ctrl+Q it was typed once and the manager replied.
+- 15, a short pane (#297): `viewport_rows` was 7, so Herdr 0.9.1 has the field. The refusal read exactly "Claude's prompt is not on screen: pane w7S:p1 is 7 rows tall, too small to show it; nothing was typed. Give it its own tab (herdr pane move w7S:p1 --new-tab --workspace w7S --no-focus), then submit again". Nothing was typed; after the move, the message was typed once.
+- 16, icons: `⊘` was red (247;118;142) and `◷` grey (115;122;162), one cell each in the list and the DAG, with titles and box edges aligned, and static. The owner saw no width issue.
+- 17, delete (#294): "Removed 7 saved files", including the three attachments; `contexts/<id>` was gone and `agent-connection.json` stayed.
+
+Found on that run, fixed in v0.1.9 (#306, #307, #309, #311) and not in v0.1.8: `quiet`'s `held_reason` and `session_busy`'s `held_reason` are different sentences; the `x` menu offers Resume to an unpaused swarm (a down-arrow and Enter meant for Take down sent "Resume work"); the new-swarm Directory prefill takes typed text at its end, so typing `~/swarm-v018/img` made `<home>/swarm-v018~/swarm-v018/img`; composer image numbering restarts per composer (not wrong).
+
+Not run: any step not listed above, including the checklist's other steps and the Codex steps. The `fs_usage` trace and the browser download were not run.
+
+**v0.1.9: not yet run on a Mac.** It is published first; the owner runs the checklist's v0.1.9 steps after publish, and
+this section will say what they showed.
 
 **What this does not show.** One Mac. macOS 15 is the build's minimum, a requirement and not something that was seen;
 the only other macOS that ran any Swarm archive was a hosted runner on 15.8.2, with the v0.1.0 archive. A release other
-than v0.1.7, v0.1.5, v0.1.4, v0.1.3 and v0.1.2 has not been shown on a Mac until this page says so.
+than v0.1.8, v0.1.7, v0.1.5, v0.1.4, v0.1.3 and v0.1.2 has not been shown on a Mac until this page says so.
 
 **Signing.** The binaries are not notarized. All but Bun are ad-hoc signed, and Bun carries its upstream Developer ID
 signature (measured on a hosted runner, v0.1.0 archive), so macOS may show a pop-up. A `gh` install left no
