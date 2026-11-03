@@ -8,7 +8,7 @@ worktrees, integrate results and clean up; a deliverable can be a PR, a branch, 
 Closed-source software. See [LICENSE](LICENSE).
 
 > **Early software.** Expect rough edges. **The Mac archive has been run on one Mac, by its owner: v0.1.4, and before it
-> v0.1.3 and v0.1.2, on macOS 26.6.2.** v0.1.5 has run there too, all but its sandbox hint, which v0.1.6 fixes. Nothing else has run it on a Mac, and v0.1.6 has not. Read "About the Mac archive" below for
+> v0.1.3 and v0.1.2, on macOS 26.6.2.** v0.1.5 has run there too, all but its sandbox hint, and v0.1.6 showed that hint working. v0.1.7 has not been run on a Mac yet. Nothing else has run it on a Mac. Read "About the Mac archive" below for
 > what was and was not shown.
 
 ## Platforms
@@ -90,6 +90,44 @@ Run `install.sh` again: the new version unpacks beside the old one and `current`
 install root), then `swarm daemon start`. Old versions stay on disk. `OPERATIONS.md` has the full steps and what a
 rollback does not undo.
 
+## What changed in v0.1.7
+
+Each item was tested on Linux, with real Herdr and real Claude where it says so. None of it has been run on a Mac, and
+none with real Codex, which does not run on the host where it was built.
+
+- **A send to Claude types only at its prompt (#284).** Before typing, the daemon reads Claude's screen. With a menu such
+  as `/status` in front of the prompt, or someone's draft in it, the send is `not_attempted` and nothing is typed; its
+  sender submits it again once the prompt is back. Claude's grey suggested prompt counts as empty. A brief after a trust
+  dialog waits up to 5 s for the prompt to be drawn. Real Claude: `/status`, `/config`, `/help` and a draft typed nothing.
+  **Limits:** a menu opened between the read and the typing still takes the text, so `completed` still means typed;
+  Codex is not checked this way.
+- **A send held behind a person's focus says so (#286).** While a TUI is attached to an agent (`f`), sends to it wait.
+  Now `session_busy` names the waiting request and `held_by` (`human` for a TUI's focus), `swarm quiet` lists it under
+  `held` after a minute, and the focused TUI's top line counts the queued requests and says Ctrl+Q lets them in.
+  **Limit:** claims are held in memory, so a past hold shows in the journal only as a gap between `queued` and `attempting`.
+- **A launch refused before it started is `not_attempted` (#281).** Herdr's `agent_pane_busy`, or a pane that is not
+  the launch's, now leaves the session absent, so the agent can be briefed again.
+- **The TUI waits for a new swarm's pane to show its prompt (#285, #287).** The manager starts once the shell has
+  finished its startup files, up to 30 s; past that the screen says what the pane last showed, and Enter waits again. If a
+  launch is still refused, Enter on the startup screen prepares a fresh manager session instead of repeating the refused
+  one. The prompt is read from the pane's visible screen. Tested with real Herdr on a slow shell and in the four-layer release test.
+- **The new-swarm Directory must be absolute (#287, #288).** A relative path is refused before anything is created;
+  `~/` and a bare `~` are the home directory.
+- **Images in the Goal and in messages (#283).** Ctrl+V reads an image from the clipboard (`wl-paste` on Linux; on macOS
+  a file copied in Finder, `pngpaste`, or `osascript`), and a pasted or dropped image path attaches the file. Images are
+  copied under the swarm's `contexts/<swarm>/attachments/`, and the manager's brief tells it to open each one.
+  `swarm delete` keeps them. In Ghostty, Cmd+V or Ctrl+Shift+V with only an image on the clipboard sends nothing, which
+  is why the key is Ctrl+V. **Unproven:** Ghostty on macOS, and Ghostty's clipboard paste on Linux, are the owner's checks.
+- **Heartbeats (#278, #279, #282).** `roles/guides/heartbeat.sh` wakes a recruiter on a timer and when something it watches
+  changes, so each recruiter keeps its own subtree current. A beat stays pending until acknowledged; one typed but
+  unacknowledged for two intervals is followed by one `repeat:`. The recovery guide gives the watches for a recruiter's
+  reports: down sessions, stopped heartbeats and quiet agents. It needs `jq`, `uuidgen`, `flock`, and
+  `timeout` or `gtimeout`; it hashes with `sha256sum`, or `shasum` where that is missing. A stock macOS lacks `timeout` and
+  `flock`, and the script names every missing tool at once with `brew install coreutils flock`. **Unproven on a Mac.**
+- **Role text (#277, #280).** A manager reads a quiet agent's last reply before deciding why it is idle, never submits
+  Claude's grey suggestion, and replaces a session whose tools are refused. An agent waits on its own process, never on a
+  host-wide process-name match. The worker brief's size is now watched, and no longer fails a test past 12000 bytes.
+
 ## About the Mac archive
 
 Be plain about what is known. The macOS runtime in the archive is a prebuilt Erlang for Apple Silicon, and the Swarm
@@ -125,7 +163,9 @@ And v0.1.2: install through `gh`, and a real CLI swarm with a Claude and a Codex
 
 Not run: the `fs_usage` trace and the browser download.
 
-**v0.1.5, on the same Mac** (codex-cli 0.166.0, Claude Code 2.1.316, real Claude and real Codex, Codex with `sandbox_mode = "danger-full-access"`): an install through `gh` and an upgrade from v0.1.4; each daemon's stop named its PID and the port; `doctor` was ok; `swarm create --config` chose the configured manager; a launch at Claude's trust dialog briefed itself once answered; the manager recruited a Codex worker, which wrote its file and messaged the manager; `swarm stop` closed each pane, with nothing typed; delete removed the swarm's saved files and kept the connection file. The sandbox hint (#271) did not fire under macOS Seatbelt in v0.1.5; v0.1.6 fixes it, not yet run on a Mac. Not run: the `fs_usage` trace and the browser download.
+**v0.1.5, on the same Mac** (codex-cli 0.166.0, Claude Code 2.1.316, real Claude and real Codex, Codex with `sandbox_mode = "danger-full-access"`): an install through `gh` and an upgrade from v0.1.4; each daemon's stop named its PID and the port; `doctor` was ok; `swarm create --config` chose the configured manager; a launch at Claude's trust dialog briefed itself once answered; the manager recruited a Codex worker, which wrote its file and messaged the manager; `swarm stop` closed each pane, with nothing typed; delete removed the swarm's saved files and kept the connection file. The sandbox hint (#271) did not fire under macOS Seatbelt in v0.1.5; v0.1.6 fixes it.
+
+**v0.1.6, on the same Mac** (codex-cli 0.166.0): an upgrade through `gh` from v0.1.5; the v0.1.5 daemon's stop named its PID and the port; `start` served and `doctor` was ok. Real Codex under `codex exec -s workspace-write` in a plain folder ran `swarm list` and got the sandbox line after the connection error. Under `sandbox-exec` denying localhost: the same line with Codex's variables set, the conditional line with only `SWARM_ACTOR`, and only the connection error for a person at a shell. The full swarm run was not repeated on v0.1.6, which changed only that client line. Not run: the `fs_usage` trace and the browser download. Not run: the `fs_usage` trace and the browser download.
 
 **What this does not show.** One Mac. macOS 15 is the build's minimum, a requirement and not something that was seen;
 the only other macOS that ran any Swarm archive was a hosted runner on 15.8.2, with the v0.1.0 archive. A release other
