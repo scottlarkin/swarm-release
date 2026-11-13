@@ -8,7 +8,7 @@ worktrees, integrate results and clean up; a deliverable can be a PR, a branch, 
 Closed-source software. See [LICENSE](LICENSE).
 
 > **Early software.** Expect rough edges. **The Mac archive has been run on one Mac, by its owner: v0.1.4, and before it
-> v0.1.3 and v0.1.2, on macOS 26.6.2.** v0.1.5 has run there too, all but its sandbox hint, and v0.1.6 showed that hint working. v0.1.7 has run there too, in part: read "About the Mac archive" for what it did not cover. v0.1.8 has run there too, in part: read "About the Mac archive" for what it did not cover. v0.1.9 is published before its Mac run: its Mac checks are run after publish. Nothing else has run it on a Mac. Read "About the Mac archive" below for
+> v0.1.3 and v0.1.2, on macOS 26.6.2.** v0.1.5 has run there too, all but its sandbox hint, and v0.1.6 showed that hint working. v0.1.7 has run there too, in part: read "About the Mac archive" for what it did not cover. v0.1.8 has run there too, in part: read "About the Mac archive" for what it did not cover. v0.1.9 and v0.1.10 are published before their Mac runs: their Mac checks are run after publish. Nothing else has run it on a Mac. Read "About the Mac archive" below for
 > what was and was not shown.
 
 ## Platforms
@@ -25,7 +25,7 @@ Not published: Intel Macs, Windows, Linux on ARM, and NixOS (the generic Linux a
 Swarm installs none of these; `install.sh` names whichever is missing.
 
 - [Herdr](https://herdr.dev) on your `PATH`. Swarm drives agents through its panes.
-- A native agent CLI that is installed and signed in: `claude` or `codex`.
+- A native agent CLI that is installed and signed in: `claude`, `codex` or `pi`.
 - Docker with the compose plugin. The daemon keeps its state in Neo4j 5.26, and `swarm init` starts the one in the
   archive's compose file.
 - Linux: OpenSSL 3 (`libcrypto.so.3`) and `ps`, which the daemon uses. macOS 15 or later on Apple Silicon: that is the build's minimum, a requirement, and only macOS 26.6.2 has been seen to run it.
@@ -89,6 +89,36 @@ Run `install.sh` again: the new version unpacks beside the old one and `current`
 (`swarm daemon stop`), repoint `current` (`ln -sfn versions/<old version> ~/.local/share/swarm/current` inside the
 install root), then `swarm daemon start`. Old versions stay on disk. `OPERATIONS.md` has the full steps and what a
 rollback does not undo.
+
+## What changed in v0.1.10
+
+Each item was tested on Linux, and none with real Codex. v0.1.10 is published before its Mac run.
+
+- **pi as a native agent (#322).** Swarm can run the pi coding agent beside Claude and Codex, through Herdr's `pi`
+  agent kind. Choose it with `--provider pi` on `swarm brief` and `swarm manager`, `manager: {provider: pi}` in a
+  configuration, or a `recommended-agent` line `pi --model M --thinking E`; with nothing chosen, the first installed of
+  `claude`, `codex` and `pi` runs. `--model` takes pi's own `provider/id`, and `--effort` is pi's thinking level (`off`,
+  `minimal`, `low`, `medium`, `high`, `xhigh`). A pi session starts on a conversation ID Swarm asks for
+  (`--session-id`) and resumes it with `--session`. `swarm doctor` and `swarm init` count `pi` as a native agent.
+  **Limits:** pi replaces its own command line with `pi` and writes nothing before its first prompt, so adopting a pi
+  already running (Shift+A, `swarm adopt`) checks only that the pane's process is pi, not which conversation it is on;
+  a launch or resume is unaffected. Run once on Linux, with a pi manager and one pi worker on a small model: launch,
+  brief, a message from worker to manager, stop, and a resume on the same conversation. Not run: adopting a live pi, pi
+  beside Claude or Codex in one swarm, a selector that chooses pi, and any Mac.
+- **A brief at a trust dialog waits instead of failing (#319).** With Herdr 0.9.1 a new swarm's brief could be refused
+  `not_attempted` at Claude's folder-trust dialog, because Herdr read the agent idle and the prompt box never appeared.
+  A send that finds a dialog on screen now waits queued behind it, as one at a dialog Herdr recognises does, and is
+  typed once the dialog is answered.
+- **`daemon.log` records session actions (#320).** One info line for each session action created or moved to another
+  state: swarm, agent, request ID, type, the change and the daemon's error sentence, with no message text, body or
+  token.
+- **A replacement on a large swarm can launch (#321).** `--replace-session` put recovery views in the new session's
+  first prompt, which on a large swarm passed the 128 KB single-prompt limit. When they do not fit they now go in a
+  private file beside the saved brief, which the brief names.
+- **A recruiter's `stopped_heartbeats` watch sees its reports' PR pollers (#316)**, so a dead poller wakes the
+  recruiter, naming the PR; a finished one is not listed.
+- **Test and development fixes.** #317: three more labs run their agents in a disposable folder outside the checkout.
+  #318: two heartbeat test cases hold by construction instead of by wall-clock timing.
 
 ## What changed in v0.1.9
 
@@ -296,8 +326,8 @@ Found on that run, fixed in v0.1.9 (#306, #307, #309, #311) and not in v0.1.8: `
 
 Not run: any step not listed above, including the checklist's other steps and the Codex steps. The `fs_usage` trace and the browser download were not run.
 
-**v0.1.9: not yet run on a Mac.** It is published first; the owner runs the checklist's v0.1.9 steps after publish, and
-this section will say what they showed.
+**v0.1.9 and v0.1.10: not yet run on a Mac.** Each is published first; the owner runs the checklist's steps after
+publish, and this section will say what they showed.
 
 **What this does not show.** One Mac. macOS 15 is the build's minimum, a requirement and not something that was seen;
 the only other macOS that ran any Swarm archive was a hosted runner on 15.8.2, with the v0.1.0 archive. A release other

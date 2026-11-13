@@ -13,11 +13,11 @@ any agent; the person does that.
 Do not do these yourself unless the person told you to in this conversation. Propose the exact
 command and wait.
 
-- **Signing in.** Logging in to Claude or Codex, and `gh auth login` if the person wants `gh` to do the
+- **Signing in.** Logging in to Claude, Codex or pi, and `gh auth login` if the person wants `gh` to do the
   downloading (the release repository is public, so `curl` needs no sign-in). You cannot do either, and
   must not look for tokens to do it for them.
 - **Anything that needs `sudo`, and installing prerequisites.** Herdr (https://herdr.dev), Docker
-  with its compose plugin, a native agent CLI (`claude` or `codex`), `ps` (the `procps` package,
+  with its compose plugin, a native agent CLI (`claude`, `codex` or `pi`), `ps` (the `procps` package,
   absent from minimal Linux images), and on Linux OpenSSL 3. The installer installs none
   of them and neither do you. Name what is missing and how to get it.
 - **The folder trust dialog.** The first time Swarm starts an agent in a directory, Claude Code or Codex
@@ -61,7 +61,7 @@ and do not repeat it. `swarm doctor` prints neither, and is the way to check.
 
 ```sh
 for t in herdr docker ps; do command -v "$t" || echo "missing: $t"; done   # each prints a path or "missing"
-command -v claude || command -v codex || echo "missing: claude or codex"   # one path is enough
+command -v claude || command -v codex || command -v pi || echo "missing: claude, codex or pi"   # one path is enough
 docker compose version && docker info >/dev/null && echo "docker ok"
 ```
 
@@ -156,7 +156,7 @@ follows it. Each check has a `status`, and these are the only ones doctor uses:
 
 - `ok`: fine.
 - `missing`: something is not there. Beside `recommended-agent` that is fine, it is optional. Beside
-  `claude` or `codex` it is fine as long as the other one is `ok`. Beside `herdr`, or a missing
+  `claude`, `codex` or `pi` it is fine as long as one of them is `ok`. Beside `herdr`, or a missing
   connection, it is not: go to the table.
 - `unreachable`: Neo4j or the daemon did not answer. Ask the person to check Docker is running, run
   `swarm init` again (safe), and read `swarm daemon logs`.
