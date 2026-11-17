@@ -8,7 +8,7 @@ worktrees, integrate results and clean up; a deliverable can be a PR, a branch, 
 Closed-source software. See [LICENSE](LICENSE).
 
 > **Early software.** Expect rough edges. **The Mac archive has been run on one Mac, by its owner: v0.1.4, and before it
-> v0.1.3 and v0.1.2, on macOS 26.6.2.** v0.1.5 has run there too, all but its sandbox hint, and v0.1.6 showed that hint working. v0.1.7 has run there too, in part: read "About the Mac archive" for what it did not cover. v0.1.8 has run there too, in part: read "About the Mac archive" for what it did not cover. v0.1.9 and v0.1.10 are published before their Mac runs: their Mac checks are run after publish. Nothing else has run it on a Mac. Read "About the Mac archive" below for
+> v0.1.3 and v0.1.2, on macOS 26.6.2.** v0.1.5 has run there too, all but its sandbox hint, and v0.1.6 showed that hint working. v0.1.7 has run there too, in part: read "About the Mac archive" for what it did not cover. v0.1.8 has run there too, in part: read "About the Mac archive" for what it did not cover. v0.1.9, v0.1.10 and v0.1.11 are published before their Mac runs: their Mac checks are run after publish. Nothing else has run it on a Mac. Read "About the Mac archive" below for
 > what was and was not shown.
 
 ## Platforms
@@ -89,6 +89,19 @@ Run `install.sh` again: the new version unpacks beside the old one and `current`
 (`swarm daemon stop`), repoint `current` (`ln -sfn versions/<old version> ~/.local/share/swarm/current` inside the
 install root), then `swarm daemon start`. Old versions stay on disk. `OPERATIONS.md` has the full steps and what a
 rollback does not undo.
+
+## What changed in v0.1.11
+
+A fix for pi workers in v0.1.10. Tested on Linux, not on a Mac.
+
+- **A pi agent can be sent to, and reads its real state (#324).** In v0.1.10, with Herdr 0.9.1, a pi agent launched
+  and took its brief, but every later send was refused `not_attempted` ("Native identity is missing or changed;
+  refusing to target a different conversation") and its state read `unknown`. Herdr 0.9.1 names a pi conversation by
+  its transcript path, `<timestamp>_<id>.jsonl`, where Swarm recorded the bare ID it launched pi on. For pi only, Swarm
+  now reads the ID from that file name and compares it. A file name in any other form matches nothing, so a send is
+  still refused rather than typed into a conversation it cannot name. Claude and Codex are unchanged. **Limits:**
+  checked by unit tests and through a fake Herdr that answers as 0.9.1 does; not yet run with Herdr 0.9.1 and a real
+  pi agent.
 
 ## What changed in v0.1.10
 
@@ -326,7 +339,7 @@ Found on that run, fixed in v0.1.9 (#306, #307, #309, #311) and not in v0.1.8: `
 
 Not run: any step not listed above, including the checklist's other steps and the Codex steps. The `fs_usage` trace and the browser download were not run.
 
-**v0.1.9 and v0.1.10: not yet run on a Mac.** Each is published first; the owner runs the checklist's steps after
+**v0.1.9, v0.1.10 and v0.1.11: not yet run on a Mac.** Each is published first; the owner runs the checklist's steps after
 publish, and this section will say what they showed.
 
 **What this does not show.** One Mac. macOS 15 is the build's minimum, a requirement and not something that was seen;
